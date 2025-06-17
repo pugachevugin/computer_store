@@ -1,0 +1,406 @@
+/* Общие стили для всего сайта */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Более современный шрифт */
+    margin: 0;
+    padding: 0;
+    background-color: #eef1f5; /* Светло-серый фон */
+    color: #333;
+    line-height: 1.6;
+    font-size: 15px;
+}
+
+/* Стили для заголовка сайта */
+header {
+    background-color: #2c3e50; /* Темно-синий/серый */
+    color: #fff;
+    padding: 1.5rem 0; /* Увеличенные отступы */
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Легкая тень */
+}
+
+header h1 {
+    margin: 0;
+    font-size: 2.5em; /* Больший размер шрифта */
+}
+
+/* Стили для навигационного меню */
+nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 15px 0 0 0; /* Отступ сверху */
+    display: flex;
+    justify-content: center;
+}
+
+nav ul li {
+    margin: 0 20px; /* Увеличенные отступы между пунктами */
+}
+
+nav ul li a {
+    color: #fff;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 1.1em;
+    padding: 5px 10px;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+nav ul li a:hover,
+nav ul li a.active {
+    background-color: #34495e; /* Чуть более светлый фон при наведении/активности */
+}
+
+/* Основной контент */
+main {
+    padding: 20px;
+    max-width: 1300px; /* Увеличил максимальную ширину для таблиц */
+    margin: 20px auto;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.08); /* Усиленная тень */
+}
+
+.section-title {
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 30px; /* Увеличил отступ */
+    font-size: 2em;
+    position: relative;
+}
+
+.section-title::after {
+    content: '';
+    display: block;
+    width: 60px;
+    height: 3px;
+    background-color: #3498db;
+    margin: 10px auto 0;
+    border-radius: 2px;
+}
+
+/* Стили для кнопок */
+.actions {
+    text-align: right;
+    margin-bottom: 25px;
+}
+
+.button {
+    display: inline-block;
+    padding: 10px 20px; /* Уменьшил отступы для кнопок */
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 0.95em; /* Немного уменьшил размер шрифта */
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    cursor: pointer;
+    border: none;
+    /* margin-left: 8px; Убран, так как будет управляться flexbox gap */
+    font-weight: 600;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); /* Менее выраженная тень */
+}
+
+.button.primary {
+    background-color: #3498db; /* Синий */
+    color: white;
+}
+
+.button.view {
+    background-color: #28a745; /* Зеленый */
+    color: white;
+}
+
+.button.edit {
+    background-color: #ffc107; /* Желтый */
+    color: #333;
+}
+
+.button.delete { /* Стиль для удаленной кнопки, если понадобится */
+    background-color: #dc3545; /* Красный */
+    color: white;
+}
+
+.button.back {
+    background-color: #6c757d; /* Серый */
+    color: white;
+}
+
+.button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+/* Стили для таблицы данных */
+.data-table {
+    width: 100%; /* Таблица занимает всю доступную ширину */
+    border-collapse: collapse;
+    margin-top: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    background-color: #fff;
+}
+
+.data-table th,
+.data-table td {
+    padding: 8px 12px; /* Уменьшил отступы для компактности */
+    border: 1px solid #e9ecef; /* Более светлая и тонкая граница */
+    white-space: nowrap; /* Предотвращает перенос текста в ячейках */
+    overflow: hidden; /* Скрывает содержимое, которое не помещается */
+    text-overflow: ellipsis; /* Добавляет многоточие для обрезанного текста */
+    font-size: 0.9em; /* Немного уменьшил размер шрифта таблицы */
+}
+
+.data-table th {
+    background-color: #f8f9fa; /* Более светлый фон для заголовков */
+    color: #495057; /* Чуть темнее текст заголовков */
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 0.85em; /* Ещё меньше шрифт для заголовков */
+    text-align: center; /* Заголовки всегда по центру */
+}
+
+.data-table tbody tr:nth-child(even) {
+    background-color: #fdfdfe; /* Чуть светлее чередующийся цвет строк */
+}
+
+.data-table tbody tr:hover {
+    background-color: #e2e6ea; /* Более заметное выделение при наведении */
+}
+
+/* Общие стили для выравнивания содержимого ячеек */
+.data-table td {
+    text-align: left; /* По умолчанию текст выравниваем по левому краю */
+}
+
+/* Специфичное выравнивание для чисел и ID */
+.data-table td:first-child, /* ID */
+.data-table td[data-type="number"], /* Используем data-type для более точного контроля */
+.data-table td[data-type="quantity"] {
+    text-align: center; /* Центрируем ID, количество */
+}
+
+.data-table td[data-type="price"] {
+    text-align: right; /* Цену выравниваем по правому краю */
+    font-weight: 500; /* Жирнее для цены */
+    color: #007bff; /* Цвет для цены */
+}
+
+
+/* Ширина столбцов для разных сущностей */
+/* ID */
+.data-table th:first-child,
+.data-table td:first-child {
+    width: 50px; /* Ещё компактнее ID */
+    min-width: 50px;
+    max-width: 60px; /* Ограничиваем, чтобы не раздувался */
+}
+
+/* Последний столбец (Действия) - теперь для 2 кнопок */
+.data-table th:last-child,
+.data-table td:last-child {
+    width: 190px; /* Увеличил ширину, чтобы кнопки не слипались */
+    min-width: 190px;
+    /* text-align: center; */ /* Убрано, так как flexbox сам будет центрировать */
+    white-space: normal; /* Разрешаем перенос строк для кнопок, если не помещаются */
+}
+
+/* Контейнер для кнопок в ячейке "Действия" */
+.button-group {
+    display: flex; /* Используем flexbox */
+    justify-content: center; /* Центрируем кнопки внутри группы */
+    align-items: center; /* Выравниваем по центру по вертикали */
+    gap: 8px; /* Расстояние между кнопками */
+    flex-wrap: nowrap; /* Запрещаем перенос кнопок на новую строку */
+}
+
+/* Остальные столбцы - даем им немного свободы */
+.data-table th:not(:first-child):not(:last-child),
+.data-table td:not(:first-child):not(:last-child) {
+    min-width: 100px; /* Меньшая минимальная ширина для текстовых полей */
+    width: auto; /* Позволяем браузеру регулировать */
+}
+
+/* Стили для форм */
+.form-container {
+    max-width: 600px;
+    margin: 30px auto;
+    padding: 30px; /* Уменьшил отступы в форме */
+    background-color: #fcfcfc;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.07);
+}
+.form-group {
+    margin-bottom: 15px; /* Уменьшенный отступ */
+}
+.form-group label {
+    display: block;
+    margin-bottom: 6px; /* Отступ от лейбла до поля */
+    font-weight: bold;
+    color: #444;
+    font-size: 1em;
+}
+.form-group input[type="text"],
+.form-group input[type="number"],
+.form-group input[type="email"],
+.form-group input[type="date"] {
+    width: calc(100% - 20px); /* Учитываем padding и border */
+    padding: 10px; /* Уменьшил отступы */
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.95em;
+    box-sizing: border-box;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-group input[type="text"]:focus,
+.form-group input[type="number"]:focus,
+.form-group input[type="email"]:focus,
+.form-group input[type="date"]:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 6px rgba(52, 152, 219, 0.2);
+    outline: none;
+}
+
+/* Стили для сообщений */
+.messages {
+    margin-top: 15px; /* Уменьшил отступ */
+    margin-bottom: 15px; /* Уменьшил отступ */
+}
+
+.message {
+    padding: 12px; /* Уменьшил отступы */
+    margin-bottom: 10px; /* Уменьшил отступ */
+    border-radius: 5px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 1em;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+.message.success {
+    background-color: #d4edda;
+    border: 1px solid #28a745;
+    color: #155724;
+}
+.message.error {
+    background-color: #f8d7da;
+    border: 1px solid #dc3545;
+    color: #721c24;
+}
+
+/* Стили для детальной карточки */
+.detail-card {
+    background-color: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    padding: 25px; /* Уменьшил отступы */
+    margin: 25px auto;
+    max-width: 550px; /* Немного уменьшил ширину */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.07);
+}
+
+.detail-card h2 {
+    color: #2c3e50;
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 2em;
+}
+
+.detail-card p {
+    margin-bottom: 10px;
+    font-size: 1.05em; /* Немного уменьшил */
+    line-height: 1.5;
+}
+
+.detail-card p strong {
+    color: #555;
+    display: inline-block;
+    width: 130px; /* Уменьшил ширину для выравнивания */
+}
+
+.back-button {
+    text-align: center;
+    margin-top: 25px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+}
+
+/* Стили для футера */
+footer {
+    text-align: center;
+    padding: 20px;
+    margin-top: 40px;
+    background-color: #2c3e50;
+    color: #ecf0f1;
+    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+    font-size: 0.9em;
+}
+
+/* Медиа-запросы для адаптивности */
+@media (max-width: 768px) {
+    nav ul {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    nav ul li {
+        margin: 8px 0;
+    }
+
+    .data-table th,
+    .data-table td {
+        padding: 6px 8px; /* Ещё меньше отступы на мобильных */
+        font-size: 0.85em; /* Ещё меньше шрифт на мобильных */
+    }
+
+    .data-table .button {
+        padding: 6px 10px; /* Меньше кнопки на мобильных */
+        font-size: 0.75em;
+        /* margin-left: 5px; */ /* Убран, так как управляем gap */
+    }
+
+    /* .button-group на мобильных */
+    .button-group {
+        flex-direction: column; /* На мобильных можем сделать вертикально, если не хватает места */
+        gap: 5px;
+    }
+
+    .data-table th:first-child,
+    .data-table td:first-child { width: 35px; min-width: 35px; max-width: 45px; } /* ID на мобильных */
+
+    .data-table th:last-child,
+    .data-table td:last-child {
+        width: 140px; /* Уменьшаем для мобильных и 2 кнопок */
+        min-width: 140px;
+    }
+
+    .data-table th:not(:first-child):not(:last-child),
+    .data-table td:not(:first-child):not(:last-child) {
+        min-width: 70px; /* Меньшая минимальная ширина для текстовых полей на мобильных */
+    }
+
+    .form-container, .detail-card {
+        padding: 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    header h1 {
+        font-size: 1.6em;
+    }
+
+    .section-title {
+        font-size: 1.3em;
+    }
+
+    .button {
+        padding: 8px 12px;
+        font-size: 0.85em;
+    }
+
+    .detail-card h2 {
+        font-size: 1.6em;
+    }
+
+    .detail-card p {
+        font-size: 0.95em;
+    }
+}
