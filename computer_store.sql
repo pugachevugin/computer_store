@@ -24,10 +24,12 @@ CREATE TABLE IF NOT EXISTS `clients` (
   `client_id` int(11) NOT NULL AUTO_INCREMENT,
   `last_name` varchar(255) NOT NULL,
   `first_name` varchar(255) NOT NULL,
-  `phone` varchar(20) DEFAULT NULL,
+  `phone_number` varchar(20) DEFAULT NULL,
   `email` varchar(255) DEFAULT NULL,
+  `is_deleted` tinyint(1) NOT NULL DEFAULT 0,
+  `address` text DEFAULT NULL,
   PRIMARY KEY (`client_id`),
-  UNIQUE KEY `phone` (`phone`),
+  UNIQUE KEY `phone` (`phone_number`),
   UNIQUE KEY `email` (`email`)
 ) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Клиенты магазина';
 
@@ -40,6 +42,9 @@ CREATE TABLE IF NOT EXISTS `employees` (
   `first_name` varchar(255) NOT NULL,
   `position` varchar(100) NOT NULL,
   `phone` varchar(20) DEFAULT NULL,
+  `is_deleted` tinyint(1) NOT NULL DEFAULT 0,
+  `hire_date` date DEFAULT NULL,
+  `salary` decimal(10,2) DEFAULT NULL,
   PRIMARY KEY (`employee_id`),
   UNIQUE KEY `phone` (`phone`)
 ) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Сотрудники магазина';
@@ -72,7 +77,7 @@ CREATE TABLE IF NOT EXISTS `invoice_items` (
   KEY `invoice_id` (`invoice_id`),
   KEY `product_id` (`product_id`),
   CONSTRAINT `invoice_items_ibfk_1` FOREIGN KEY (`invoice_id`) REFERENCES `incoming_invoices` (`invoice_id`) ON DELETE CASCADE,
-  CONSTRAINT `invoice_items_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`)
+  CONSTRAINT `invoice_items_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Состав приходной накладной';
 
 -- Экспортируемые данные не выделены.
@@ -90,8 +95,8 @@ CREATE TABLE IF NOT EXISTS `orders` (
   KEY `client_id` (`client_id`),
   KEY `employee_id` (`employee_id`),
   KEY `status_id` (`status_id`),
-  CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`client_id`) REFERENCES `clients` (`client_id`),
-  CONSTRAINT `orders_ibfk_2` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`employee_id`),
+  CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`client_id`) REFERENCES `clients` (`client_id`) ON DELETE CASCADE,
+  CONSTRAINT `orders_ibfk_2` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`employee_id`) ON DELETE CASCADE,
   CONSTRAINT `orders_ibfk_3` FOREIGN KEY (`status_id`) REFERENCES `order_statuses` (`status_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Клиентские заказы';
 
@@ -108,7 +113,7 @@ CREATE TABLE IF NOT EXISTS `order_items` (
   KEY `order_id` (`order_id`),
   KEY `product_id` (`product_id`),
   CONSTRAINT `order_items_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`order_id`) ON DELETE CASCADE,
-  CONSTRAINT `order_items_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`)
+  CONSTRAINT `order_items_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Состав конкретного заказа';
 
 -- Экспортируемые данные не выделены.
@@ -145,8 +150,10 @@ CREATE TABLE IF NOT EXISTS `products` (
   `price` decimal(10,2) NOT NULL,
   `quantity_in_stock` int(11) NOT NULL DEFAULT 0,
   `manufacturer` varchar(255) DEFAULT NULL,
+  `is_deleted` tinyint(1) NOT NULL DEFAULT 0,
+  `description` text DEFAULT NULL,
   PRIMARY KEY (`product_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Товары на складе';
+) ENGINE=InnoDB AUTO_INCREMENT=57 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Товары на складе';
 
 -- Экспортируемые данные не выделены.
 
@@ -187,7 +194,7 @@ CREATE TABLE IF NOT EXISTS `request_items` (
   KEY `request_id` (`request_id`),
   KEY `product_id` (`product_id`),
   CONSTRAINT `request_items_ibfk_1` FOREIGN KEY (`request_id`) REFERENCES `supplier_requests` (`request_id`) ON DELETE CASCADE,
-  CONSTRAINT `request_items_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`)
+  CONSTRAINT `request_items_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Состав заявки поставщику';
 
 -- Экспортируемые данные не выделены.

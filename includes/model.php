@@ -1,163 +1,118 @@
 <?php
+// includes/model.php
 
-
-/**
- * Устанавливает соединение с базой данных.
- * @return mysqli Объект соединения с базой данных.
- * @throws Exception Если не удалось подключиться к базе данных.
- */
 function connectDB() {
-    $servername = "localhost";
-    $username = "root";
-    $password = "";
-    $dbname = "computer_shop_db";
+    $host = 'localhost';
+    $dbname = 'computer_store';
+    $username = 'root'; // Ваше имя пользователя MySQL
+    $password = '';     // Ваш пароль MySQL
+    $charset = 'utf8mb4';
 
-    $conn = new mysqli($servername, $username, $password, $dbname);
+    $dsn = "mysql:host=$host;dbname=$dbname;charset=$charset";
+    $options = [
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+        PDO::ATTR_EMULATE_PREPARES => false,
+    ];
 
-    if ($conn->connect_error) {
-        error_log("Connection failed: " . $conn->connect_error);
-        throw new Exception("Ошибка подключения к базе данных.");
+    try {
+        return new PDO($dsn, $username, $password, $options);
+    } catch (PDOException $e) {
+        throw new Exception("Ошибка подключения к базе данных: " . $e->getMessage());
     }
-    $conn->set_charset("utf8mb4");
-    return $conn;
 }
 
-/**
- * Получает все записи из указанной таблицы.
- * @param mysqli $conn Объект соединения с БД.
- * @param string $table_name Имя таблицы.
- * @param string $id_field Имя поля ID для сортировки.
- * @return array Массив записей.
- */
-function getAllItems($conn, $table_name, $id_field) {
-    $items = [];
-    // ИСПРАВЛЕНИЕ: Изменено DESC на ASC для сортировки по возрастанию ID.
-    $sql = "SELECT * FROM " . $table_name . " ORDER BY " . $id_field . " ASC"; 
-    $result = $conn->query($sql);
+function getAllItems($conn, $tableName, $idField, $includeDeleted = false) {
+    // Check if 'deleted_at' column exists in the table
+    $stmt = $conn->query("SHOW COLUMNS FROM $tableName LIKE 'deleted_at'");
+    $hasDeletedColumn = ($stmt->rowCount() > 0);
 
-    if ($result && $result->num_rows > 0) {
-        while ($row = $result->fetch_assoc()) {
-            $items[] = $row;
-        }
+    $sql = "SELECT * FROM $tableName";
+    if (!$includeDeleted && $hasDeletedColumn) {
+        $sql .= " WHERE deleted_at IS NULL";
     }
-    return $items;
+    $sql .= " ORDER BY $idField DESC";
+
+    return $conn->query($sql)->fetchAll(PDO::FETCH_ASSOC);
 }
 
-/**
- * Получает запись по ID из указанной таблицы.
- * @param mysqli $conn Объект соединения с БД.
- * @param string $table_name Имя таблицы.
- * @param string $id_field Имя поля ID.
- * @param int $id Значение ID.
- * @return array|null Запись или null, если не найдено.
- */
-function getItemById($conn, $table_name, $id_field, $id) {
-    $stmt = $conn->prepare("SELECT * FROM " . $table_name . " WHERE " . $id_field . " = ?");
-    $stmt->bind_param("i", $id);
+function getItemById($conn, $tableName, $idField, $id, $includeDeleted = false) {
+    $stmt = $conn->query("SHOW COLUMNS FROM $tableName LIKE 'deleted_at'");
+    $hasDeletedColumn = ($stmt->rowCount() > 0);
+
+    $sql = "SELECT * FROM $tableName WHERE $idField = :id";
+    if (!$includeDeleted && $hasDeletedColumn) {
+        $sql .= " AND deleted_at IS NULL";
+    }
+
+    $stmt = $conn->prepare($sql);
+    $stmt->bindParam(':id', $id, PDO::PARAM_INT);
     $stmt->execute();
-    $result = $stmt->get_result();
-    $item = $result->fetch_assoc();
-    $stmt->close();
-    return $item;
+    return $stmt->fetch(PDO::FETCH_ASSOC);
 }
 
-/**
- * Создает новую запись в указанной таблице.
- * @param mysqli $conn Объект соединения с БД.
- * @param string $table_name Имя таблицы.
- * @param array $data Ассоциативный массив данных для вставки.
- * @return int|bool ID новой записи или false в случае ошибки.
- */
-function createItem($conn, $table_name, $data) {
-    $fields = implode(", ", array_keys($data));
-    $placeholders = implode(", ", array_fill(0, count($data), "?"));
-    $sql = "INSERT INTO " . $table_name . " (" . $fields . ") VALUES (" . $placeholders . ")";
+function createItem($conn, $tableName, $data) {
+    $fields = implode(', ', array_keys($data));
+    $placeholders = ':' . implode(', :', array_keys($data));
 
+    $sql = "INSERT INTO $tableName ($fields) VALUES ($placeholders)";
     $stmt = $conn->prepare($sql);
-    if (!$stmt) {
-        error_log("Prepare failed: (" . $conn->errno . ") " . $conn->error);
-        return false;
-    }
 
-    $types = '';
-    $values = [];
     foreach ($data as $key => $value) {
-        if ($key == 'price') {
-            $types .= 'd';
-        } elseif ($key == 'quantity_in_stock') {
-            $types .= 'i';
-        } else {
-            $types .= 's';
-        }
-        $values[] = &$data[$key];
+        $stmt->bindValue(":$key", $value);
     }
 
-    $bind_names[] = $types;
-    for ($i = 0; $i < count($values); $i++) {
-        $bind_names[] = &$values[$i];
-    }
-    call_user_func_array([$stmt, 'bind_param'], $bind_names);
-
-    if ($stmt->execute()) {
-        $new_id = $stmt->insert_id;
-        $stmt->close();
-        return $new_id;
-    } else {
-        error_log("Execute failed: (" . $stmt->errno . ") " . $stmt->error);
-        $stmt->close();
-        return false;
-    }
+    return $stmt->execute();
 }
 
-/**
- * Обновляет запись в указанной таблице.
- * @param mysqli $conn Объект соединения с БД.
- * @param string $table_name Имя таблицы.
- * @param string $id_field Имя поля ID.
- * @param int $id ID записи для обновления.
- * @param array $data Ассоциативный массив данных для обновления.
- * @return bool True в случае успеха, false в случае ошибки.
- */
-function updateItem($conn, $table_name, $id_field, $id, $data) {
-    $set_parts = [];
+function updateItem($conn, $tableName, $idField, $id, $data) {
+    $setParts = [];
     foreach ($data as $key => $value) {
-        $set_parts[] = $key . " = ?";
+        $setParts[] = "$key = :$key";
     }
-    $sql = "UPDATE " . $table_name . " SET " . implode(", ", $set_parts) . " WHERE " . $id_field . " = ?";
+    $setClause = implode(', ', $setParts);
 
+    $sql = "UPDATE $tableName SET $setClause WHERE $idField = :id";
     $stmt = $conn->prepare($sql);
-    if (!$stmt) {
-        error_log("Prepare failed: (" . $conn->errno . ") " . $conn->error);
-        return false;
-    }
 
-    $types = '';
-    $values = [];
     foreach ($data as $key => $value) {
-        if ($key == 'price') {
-            $types .= 'd';
-        } elseif ($key == 'quantity_in_stock') {
-            $types .= 'i';
-        } else {
-            $types .= 's';
-        }
-        $values[] = &$data[$key];
+        $stmt->bindValue(":$key", $value);
     }
-    $types .= 'i';
-    $values[] = &$id;
+    $stmt->bindParam(':id', $id, PDO::PARAM_INT);
 
-    $bind_names[] = $types;
-    for ($i = 0; $i < count($values); $i++) {
-        $bind_names[] = &$values[$i];
-    }
-    call_user_func_array([$stmt, 'bind_param'], $bind_names);
+    return $stmt->execute();
+}
 
-    if ($stmt->execute()) {
-        $stmt->close();
-        return true;
-    } else {
-        error_log("Execute failed: (" . $stmt->errno . ") " . $stmt->error);
-        $stmt->close();
-        return false;
+function softDeleteItem($conn, $tableName, $idField, $id) {
+    $sql = "UPDATE $tableName SET deleted_at = NOW() WHERE $idField = :id";
+    $stmt = $conn->prepare($sql);
+    $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+    return $stmt->execute();
+}
+
+function restoreItem($conn, $tableName, $idField, $id) {
+    $sql = "UPDATE $tableName SET deleted_at = NULL WHERE $idField = :id";
+    $stmt = $conn->prepare($sql);
+    $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+    return $stmt->execute();
+}
+
+function deleteItem($conn, $tableName, $idField, $id) {
+    $sql = "DELETE FROM $tableName WHERE $idField = :id";
+    $stmt = $conn->prepare($sql);
+    $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+    return $stmt->execute();
+}
+
+function getTrashedItems($conn, $tableName, $idField) {
+    $stmt = $conn->query("SHOW COLUMNS FROM $tableName LIKE 'deleted_at'");
+    $hasDeletedColumn = ($stmt->rowCount() > 0);
+
+    if (!$hasDeletedColumn) {
+        // If there's no 'deleted_at' column, this table doesn't support soft delete
+        return [];
     }
+
+    $sql = "SELECT * FROM $tableName WHERE deleted_at IS NOT NULL ORDER BY deleted_at DESC";
+    return $conn->query($sql)->fetchAll(PDO::FETCH_ASSOC);
 }
